@@ -104,6 +104,7 @@ mean(as.vector(sapply(standard_sample, function(sent) { avg_char_length(sent) })
 wiki_database <- 
   data.frame(topic = rep("psychology", 2),
              source = as.factor(c("wiki", "simple_wiki")),
+             num_sentences = c(length(standard_sample), length(simple_sample)),
              the_freq = c(word_freq("the", standard_sample), 
                            word_freq("the", simple_sample)),
              avg_sentence_length = c(avg_sent_length(standard_sample),
@@ -132,6 +133,7 @@ add_topic <- function(dat, topic) {
        data.frame(
          topic = rep(topic, 2),
          source = c("wiki", "simple_wiki"),
+         num_sentences = c(length(standard_dat), length(simple_dat)),
          the_freq = c(word_freq("the", standard_dat), 
                        word_freq("the", simple_dat)),
          avg_sentence_length = c(avg_sent_length(standard_dat),
@@ -190,6 +192,7 @@ ggplot(data = wiki_the_freq,
   geom_abline(slope = 1) +
   geom_point(aes(color = topic))
 
+write.csv(file = "wiki_database.csv", wiki_database)
 
 # sentence length: much longer sentences for standard wiki
 
@@ -245,3 +248,13 @@ ggplot(data = wiki_the_location,
   ylab("Location of 'the' in Standard Wiki") +
   geom_abline(slope = 1) +
   geom_point(aes(color = topic))
+
+
+acc_wiki_database <-
+  wiki_database %>% group_by(source) %>% summarize(
+    num_sentences = sum(num_sentences),
+    the_freq = mean(the_freq),
+    avg_sentence_length = mean(avg_sentence_length),
+    avg_word_length = mean(avg_word_length),
+    the_location = mean(the_location, na.rm = T)
+  )
